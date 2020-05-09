@@ -5,7 +5,7 @@ export function FooPage({loadedEvent}) {
 
   useEffect(() => {
     loadedEvent.next(true);
-  }, []);
+  }, [loadedEvent]);
   return (
 
     <div className="foo-page">

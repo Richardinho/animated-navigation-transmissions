@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { useHistory } from 'react-router-dom';
 
 export function PageContainer({canReplaceHistory, children}) {
@@ -6,8 +6,6 @@ export function PageContainer({canReplaceHistory, children}) {
   const timeoutId = useRef(null);
 
   useEffect(() => {
-
-    // todo: remove this listener when the component is unmounted
 
     window.addEventListener('scroll', () => {
 
@@ -27,7 +25,7 @@ export function PageContainer({canReplaceHistory, children}) {
 
       timeoutId.current = tid;
     });
-  }, []);
+  }, [history, canReplaceHistory]);
 
   return (
     <div>

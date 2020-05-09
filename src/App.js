@@ -1,8 +1,7 @@
-import React, {useRef, useState} from 'react';
+import React, {useRef } from 'react';
 import 'reset-css';
 import './App.css';
-import { useHistory, Switch, BrowserRouter as Router, Route, Link, NavLink } from 'react-router-dom'
-import { CSSTransition } from 'react-transition-group';
+import { BrowserRouter as Router } from 'react-router-dom'
 import { Page } from './page';
 import { FooPage } from './foo.page';
 import { BarPage } from './bar.page';
@@ -10,15 +9,16 @@ import { HomePage } from'./home.page';
 import { PageContainer } from './page-container';
 
 window.history.scrollRestoration = 'manual';
-window.addEventListener('scroll', () => {
-  //console.log('scrolled');
-});
 
 function App() {
   const canReplaceHistory = useRef(true);
 
-  function setCanReplaceHistory(can) {
-    canReplaceHistory.current = can;
+  function enableScrollHandler() {
+    canReplaceHistory.current = true;
+  }
+
+  function disableScrollHandler() {
+    canReplaceHistory.current = false;
   }
 
   return (
@@ -27,19 +27,29 @@ function App() {
       <div className="App">
         <div className="container">
           <PageContainer canReplaceHistory={canReplaceHistory}>
-            <Page name="Home" exact path="/">
+            <Page
+              enableScrollHandler={enableScrollHandler}
+              disableScrollHandler={disableScrollHandler}
+              exact
+              path="/">
               {(loadedEvent$) => (
                 <HomePage loadedEvent={loadedEvent$}/>
               )}
             </Page>
 
-            <Page setCanReplaceHistory={setCanReplaceHistory} name="Bar" path="/bar">
+            <Page
+              enableScrollHandler={enableScrollHandler}
+              disableScrollHandler={disableScrollHandler}
+              path="/bar">
               {(loadedEvent$) => (
                 <BarPage loadedEvent={loadedEvent$}/>
               )}
             </Page>
 
-            <Page setCanReplaceHistory={setCanReplaceHistory} name="Foo" path="/foo">
+            <Page
+              enableScrollHandler={enableScrollHandler}
+              disableScrollHandler={disableScrollHandler}
+              path="/foo">
               {(loadedEvent$) => (
                 <FooPage loadedEvent={loadedEvent$}/>
               )}

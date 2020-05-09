@@ -34,7 +34,7 @@ export function BarPage({loadedEvent}) {
 
       loadedEvent.next(true);
     }, 600);
-  }, []);
+  }, [loadedEvent]);
 
   return (
     <>
