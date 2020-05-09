@@ -19,5 +19,31 @@ Transition Groups provide some components for creating animations in React. I us
 The difficulties start when you want to simulate restoring the page scroll when we navigate to a new page. The animation effect that I wanted to achieve was for the old page to slide out to the left and for the new page to slide in at the same time also from the right. When navigating to a new page, that page will be scrolled to the top. If they navigate to a previously visited page which they had scrolled, the scroll value should be restored.
 As it happens, browsers do actually try and carry out this scroll restoration for apps with simulated routing, but it usually ceases to work properly when you start to do anything more complicated. e.g. with animations. In fact, there is a property of the history object `scrollRestoration` which you can set to `manual` in order to disable this browser behaviour.
 
+So how do we go about restoring the scroll position of a page? First we must find a way of storing the scroll value of the page when we leave it. Now, you may be aware that the history list contains a list of all the different URLs visited and that each item in this list contains a state propety in which you can store arbitary information. This property can be set by passing an argument to the `push()` or the `replace()` methods. It seems as if this would be a good place to store our scroll value. The problem is that we need to record this data at the moment the user leaves the page. If they do this by clicking on a link, then we intercept this event, and update the state object then. But if they leave the page by clicking on either the *Back* or *Forward* buttons, then we find that we cannot. It might seem that we could hook into the `pop` event, but unfortunately, the item at the top of the history stack will represent the new page, not the old one, and you can't query the history stack for items either!
+
+So are we stuck? Not quite. What we can do is attach a scroll handler which waits until the user stop scrolling and then queries the page current scroll value and then store this in the state using the `replace()` method. Because we use `replace()` rather than `push()` the user is unaware that the url is technically changing everytime they scroll!
+Here is the code for this: 
+```
+    window.addEventListener('scroll', () => {
+
+      /*
+       *  We only want this to run after the user has stopped scrolling
+       */
+
+      clearTimeout(timeoutId.current);
+
+      const tid = setTimeout(() => {
+        if (canReplaceHistory.current) {
+          
+          const path = history.location.pathname;
+          history.replace(path, { scroll: window.pageYOffset});
+        }
+      }, 500);
+
+      timeoutId.current = tid;
+    });
+
+```
+On every scroll event, we set schedule a timeout function. Every event cancels the previous timeout. Only when the user stops scrolling will the timeout actually complete and our handler will be called.
 
 
