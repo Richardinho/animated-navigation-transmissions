@@ -1,6 +1,7 @@
-In Single Page Apps, one of the things it is possible to do is simulate the effect of navigating between pages in response to changing the URL in the address bar, or by pressing either of the history buttons, without actually reloading the page. In common parlance, this is normally called simply 'routing' and SPA libraries such as React and Angular provide facilities for implementing this, either out of the box (in the case o f Angular), or via 3rd parties (for React).
+Single Page Apps often take control of routing where the URL in the address bar is changed, and the page appears to be updated without an actual refresh taking place.
+This is of course accomplished using the History API and frameworks for building SPAs often provide libraries to facilitate working with these. In the case of React, which we will cover in this blog post,  *React-Router* is a popular library used for this purpose.
 
-These libraries typically utilise the native browser History API, which allows the manipulating of the page URL without reloading the page.
+
 
 If routing is implemented well, a web app appears almost indistinguiable from a normal website and they are able to interact with it in much the same way. For example, being able to navigate through their history via the history buttons, and being able to bookmark pages for future visits.
 
