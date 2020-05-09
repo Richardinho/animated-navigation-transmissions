@@ -1,68 +1,29 @@
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+In Single Page Apps, one of the things it is possible to do is simulate the effect of navigating between pages in response to changing the URL in the address bar, or by pressing either of the history buttons, without actually reloading the page. In common parlance, this is normally called simply 'routing' and SPA libraries such as React and Angular provide facilities for implementing this, either out of the box (in the case o f Angular), or via 3rd parties (for React).
 
-## Available Scripts
+These libraries typically utilise the native browser History API, which allows the manipulating of the page URL without reloading the page.
 
-In the project directory, you can run:
+If routing is implemented well, a web app appears almost indistinguiable from a normal website and they are able to interact with it in much the same way. For example, being able to navigate through their history via the history buttons, and being able to bookmark pages for future visits.
 
-### `npm start`
+The key to a successful implemention is therefore for it to behave in exactly the same way as a conventional website. This can be challenging since there are some subtle aspects of how conventional routing works  that programmers might not be aware of, but which users will probably notice if they aren't reimplemented correctly.  
 
-Runs the app in the development mode.<br />
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
 
-The page will reload if you make edits.<br />
-You will also see any lint errors in the console.
+The starting point of any attempt to emulate the normal behaviour of a browser is to first study that behaviour. It is important to do this across browsers as it is often in the subtle details that browsers differ most.
 
-### `npm test`
 
-Launches the test runner in the interactive watch mode.<br />
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+How to animate between routes in a SPA
 
-### `npm run build`
+With the History API, simulating routing in a SPA becomes possible. To make the user experience optimal, we should attempt to emulate as closely as possible the behaviour of the browser when actual navigation between pages takes place. This is challenging as their are subtleties in the behaviour of the browser the user is probably aware of, albeit sublimaly, and will notice the shortcomings of your app if you fail to support them.
 
-Builds the app for production to the `build` folder.<br />
-It correctly bundles React in production mode and optimizes the build for the best performance.
+1. Scroll Restoration
 
-The build is minified and the filenames include the hashes.<br />
-Your app is ready to be deployed!
+For conventional webpages, when you revisit a page via the history buttons, or when you refresh the page, the browser scrolls the page to the same position as it was before.
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+2. animations
+Animating Forwards and Backwards
+It would be nice to have different animation effects for different kind of navigation.
+For example, the page slides in from the left when the user navigates by clicking on a link or when clicking the forward button, and the back slides in from the right when clicking the back button,(denoting the fact that you're revisiting an old page).
 
-### `npm run eject`
+The problem with this is that whilst we can detect the difference between the user clicking on a link and using the history buttons, we can't tell the difference between the user having clicked forwards and having clicked back. For this reason, it's better for all animations just to be the same. 
 
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
-
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
-
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
-
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
-
-## Learn More
-
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
-
-### Code Splitting
-
-This section has moved here: https://facebook.github.io/create-react-app/docs/code-splitting
-
-### Analyzing the Bundle Size
-
-This section has moved here: https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size
-
-### Making a Progressive Web App
-
-This section has moved here: https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app
-
-### Advanced Configuration
-
-This section has moved here: https://facebook.github.io/create-react-app/docs/advanced-configuration
-
-### Deployment
-
-This section has moved here: https://facebook.github.io/create-react-app/docs/deployment
-
-### `npm run build` fails to minify
-
-This section has moved here: https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify
+This is a pity since the value of such animations is to give emphasis to the meaning of an action.
+3. 

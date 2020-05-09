@@ -2,18 +2,13 @@
 .container {
   position: relative;
 }
-
-.page-container {
-  padding: 10px;
-}
-
-.page-enter,
-.page-exit {
+.page-exit, 
+.page-enter {
+  overflow: hidden;
   left: 0;
   top: 0;
   right: 0;
   bottom: 0;
-  overflow: hidden;
 }
 
 .page-enter {
@@ -22,25 +17,17 @@
 
 .page-enter-active {
   transform: translate(0);
-  transition: linear transform 400ms;
+  transition: linear transform 4300ms;
 }
 
 .page-exit {
-  transform: translate(0);
 }
 
 .page-exit-active {
   transform: translate(-100%, 0);
-  transition: linear transform 400ms;
+  transition: linear transform 4300ms;
 }
 
 p {
   font-size: 2em;
-  margin: 10px 0;
-}
-
-.foo-page {
-}
-
-.bar-page {
 }
