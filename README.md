@@ -1,14 +1,23 @@
-Single Page Apps often take control of routing where the URL in the address bar is changed, and the page appears to be updated without an actual refresh taking place.
-This is of course accomplished using the History API and frameworks for building SPAs often provide libraries to facilitate working with these. In the case of React, which we will cover in this blog post,  *React-Router* is a popular library used for this purpose.
+# Animated page transitions in a Single Page App
 
+##  Introduction
+In a Single Page App, we can take control of the routing process and update the content of the page in response to URL changes without having to perform a full page refresh. 
+A nice thing that this permits us to do is have animated transitions between the old and new content. This, however, can be somewhat tricky to implement. We want to avoid the common pitfall of improving the user experience in one aspect whilst degrading it in another.  This article describes an attempt at such an implementation using React and React Router.
 
+In order to simulate page navigation, it's important to first understand how navigation takes place in a conventional website. 
+Page navigation occurs in the following cases:
+* When the user clicks on a link
+* When the user types an address into the address bar and presses *return*
+* When the user clicks the *back* or *forwards* history buttons
+* When the user refreshes the page
 
-If routing is implemented well, a web app appears almost indistinguiable from a normal website and they are able to interact with it in much the same way. For example, being able to navigate through their history via the history buttons, and being able to bookmark pages for future visits.
+In all these cases, the existing page is destroyed and replaced with a new one. All resources have to be reloaded and Javascript is reparsed and re-executed.
 
-The key to a successful implemention is therefore for it to behave in exactly the same way as a conventional website. This can be challenging since there are some subtle aspects of how conventional routing works  that programmers might not be aware of, but which users will probably notice if they aren't reimplemented correctly.  
+Another subtle effect, is that when a page is revisited either by clicking one of the History buttons, or by reloading the page, the scroll position that existed when the page was last loaded is restored.
 
+______
 
-The starting point of any attempt to emulate the normal behaviour of a browser is to first study that behaviour. It is important to do this across browsers as it is often in the subtle details that browsers differ most.
+Any implementation of routing in a SPA must at least replicate the preceding behaviour.
 
 
 How to animate between routes in a SPA
