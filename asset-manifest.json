@@ -1,0 +1,25 @@
+{
+  "files": {
+    "main.css": "/animated-navigation-transmissions/static/css/main.d1b6cddb.chunk.css",
+    "main.js": "/animated-navigation-transmissions/static/js/main.882707e5.chunk.js",
+    "main.js.map": "/animated-navigation-transmissions/static/js/main.882707e5.chunk.js.map",
+    "runtime-main.js": "/animated-navigation-transmissions/static/js/runtime-main.c49109f8.js",
+    "runtime-main.js.map": "/animated-navigation-transmissions/static/js/runtime-main.c49109f8.js.map",
+    "static/css/2.117ce29f.chunk.css": "/animated-navigation-transmissions/static/css/2.117ce29f.chunk.css",
+    "static/js/2.8aa4e93b.chunk.js": "/animated-navigation-transmissions/static/js/2.8aa4e93b.chunk.js",
+    "static/js/2.8aa4e93b.chunk.js.map": "/animated-navigation-transmissions/static/js/2.8aa4e93b.chunk.js.map",
+    "index.html": "/animated-navigation-transmissions/index.html",
+    "precache-manifest.3de0652b364f1dd1862c020a189cc1ec.js": "/animated-navigation-transmissions/precache-manifest.3de0652b364f1dd1862c020a189cc1ec.js",
+    "service-worker.js": "/animated-navigation-transmissions/service-worker.js",
+    "static/css/2.117ce29f.chunk.css.map": "/animated-navigation-transmissions/static/css/2.117ce29f.chunk.css.map",
+    "static/css/main.d1b6cddb.chunk.css.map": "/animated-navigation-transmissions/static/css/main.d1b6cddb.chunk.css.map",
+    "static/js/2.8aa4e93b.chunk.js.LICENSE.txt": "/animated-navigation-transmissions/static/js/2.8aa4e93b.chunk.js.LICENSE.txt"
+  },
+  "entrypoints": [
+    "static/js/runtime-main.c49109f8.js",
+    "static/css/2.117ce29f.chunk.css",
+    "static/js/2.8aa4e93b.chunk.js",
+    "static/css/main.d1b6cddb.chunk.css",
+    "static/js/main.882707e5.chunk.js"
+  ]
+}
