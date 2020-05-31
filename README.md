@@ -1,11 +1,13 @@
-<<<<<<< HEAD
 # Animated page transitions in a Single Page App
 
 ##  Introduction
 In a Single Page App, we can take control of the routing process and update the content of the page in response to URL changes without having to perform a full page refresh. 
 A nice thing that this permits us to do is have animated transitions between the old and new content. This, however, can be somewhat tricky to implement. We want to avoid the common pitfall of improving the user experience in one aspect whilst degrading it in another.  This article describes an attempt at such an implementation using React and React Router.
 
-In order to simulate page navigation, it's important to first understand how navigation takes place in a conventional website. 
+## Preparation
+In order to simulate page navigation, it's important to first understand how navigation takes place in a conventional website.
+This is because any implementation of routing must be at least as good as the native behaviour.
+
 Page navigation occurs in the following cases:
 * When the user clicks on a link
 * When the user types an address into the address bar and presses *return*
@@ -16,37 +18,29 @@ In all these cases, the existing page is destroyed and replaced with a new one. 
 
 Another subtle effect, is that when a page is revisited either by clicking one of the History buttons, or by reloading the page, the scroll position that existed when the page was last loaded is restored.
 
-______
+The last is the sort of effect which users may not consciously be aware of but which they notice if it happens to be absent.
 
-Any implementation of routing in a SPA must at least replicate the preceding behaviour.
-=======
-# Animated Transitions with Scroll Restore in a React SPA
-Single Page Apps often take control of routing, where the URL in the address bar is changed, and the page appears to be updated but no new HTTP request for a page actually takes place.
-This is of course accomplished using the History API, and frameworks for building SPAs often provide libraries to facilitate working with these. In the case of React, which we will cover in this blog post,  [React-Router]() is one popular library used for this purpose.
+## The App
+What I am building is an application which features 3 pages of content. There are links to these pages interspersed across the application. When the user clicks on a link, the old page is animated out and the new page is animated in. Additionally, when the user navigates back (or forwards) to a previously visited page, the scroll position that existed when they left will be restored.
 
-Our aim in implementing routing should be to emulate, as closely as possible, the default behaviour of the browser. Ideally, the user should be almost unaware that they are using an SPA at all. In particular, the use should be able to use the history back and forward buttons and be able to use revisit pages of the app via Bookmarks.
+### Set up and libraries used
+My demonstration implementation is built using React and using the libraries React Router for routing, CSS Transition Group for animated effects, and RxJS for Observables. I also use Lodash for some utility methods. 
+The application is set up using create react app which provides a nice foundation for React projects.
 
-This is somewhat challenging as it turns out that there are aspects of conventional routing that programmers may not be aware of but which users are likely to notice if absent.
+### Routing
+Setting up the routing is the easiest part and so I'm not going to go into it. The React Router has a good tutorial on this subject which describes the process much better than I could.
 
-For example, if the user clicks on the *Back* button to go to a previous page, the scroll position of the page when they left it is restored. This also occurs with the *Forward* button and when the page is refreshed.
+### Animations
+The CSSTransition component is used for the animation here. What this component does is define a transition as a series of temporal phases through which the component passes. During each phase, class names are applied and removed to the animated element. The programmer is able to hook into these class names to apply CSS properties that carry out the animation effect.
 
-As well as this, we might also want to enhance the user conventional navigation experience with the addition of animated transitions. In this post, I am going to talk about my experience in implementing this.
+Our animation consists of the old page sliding out to the left and the new page sliding in from the right in the same direction. Normally, a page will just be positioned statically within the browser, but during the animation we need to handle the fact that both pages will be visible at the same time. To achieve this, we hook into phases provided by CSSTransition component. When the ENTER phase begins, we fix the position of both incoming and outgoing pages by setting their css property `position: fixed`. Once we reach the ENTERED phase, we set the position of the incoming pages property to `static` (At this point we don't care anymore about the outgoing page). 
 
-## Set up and libraries used
-I start with a basic React application created using [Create React App](). In addition, I used React Router for routing, CSS [Transition Group]() for animated effects, and the [RxJS library]() for Observables. I also used Lodash for utility methods (the very useful `get()` function).
+This is fairly standard stuff. Things get much more complicated when we come to restoring the scroll position of previously visited pages. The first thing we have to address here is that the browser itself will try and do this for us on a pop event. The problem is that it doesn't do it very well, particularly if any content is loaded asynchronously. Fortunately we have the ability to turn this off, which we do by setting `window.history.scrollRestoration = 'manual'`
 
-Setting up routing using React Router is pretty easy and I'm not going to go into this. For this project I've kept it pretty simple with just two routes. For one of the routes I will be simulating a network request for asynchronous content.
->>>>>>> bc529e91951002cba8c6b080abc6f119eac7d71a
+In order to manually restore the scroll, we need to know the scroll position of a page when it is navigated away from. In an ideal world, the browser would store this somewhere for us, but it does not. We need therefore to record the scroll value when the user navigates away from a page, and find a place to store it. Finding the time at which to record it is hard because the user can perform this navigation in more than one way. If they click on a link, we could certainly hook into this and record the scroll value. But if they navigate using the *Back* or *Forward* buttons, then we cannot. The Pop event occurs after the navigation occurs, not before. So in fact there is no comprehensive way of detecting when the user is going to navigate away from the page.
 
-Transition Groups provide some components for creating animations in React. I used the CSSTransition component for this. There is a tutorial in their documentation for using this with React Router and I largely followed this. Again, nothing here is out of the ordinary.
+However, there is a workaround. Instead of measuring the scroll when the user performs a navigation, we measure it after every time that they scroll. That way when the use does navigate, we will always already have the scroll value stored.
 
-The difficulties start when you want to simulate restoring the page scroll when we navigate to a new page. The animation effect that I wanted to achieve was for the old page to slide out to the left and for the new page to slide in at the same time also from the right. When navigating to a new page, that page will be scrolled to the top. If they navigate to a previously visited page which they had scrolled, the scroll value should be restored.
-As it happens, browsers do actually try and carry out this scroll restoration for apps with simulated routing, but it usually ceases to work properly when you start to do anything more complicated. e.g. with animations. In fact, there is a property of the history object `scrollRestoration` which you can set to `manual` in order to disable this browser behaviour.
-
-So how do we go about restoring the scroll position of a page? First we must find a way of storing the scroll value of the page when we leave it. Now, you may be aware that the history list contains a list of all the different URLs visited and that each item in this list contains a state propety in which you can store arbitary information. This property can be set by passing an argument to the `push()` or the `replace()` methods. It seems as if this would be a good place to store our scroll value. The problem is that we need to record this data at the moment the user leaves the page. If they do this by clicking on a link, then we intercept this event, and update the state object then. But if they leave the page by clicking on either the *Back* or *Forward* buttons, then we find that we cannot. It might seem that we could hook into the `pop` event, but unfortunately, the item at the top of the history stack will represent the new page, not the old one, and you can't query the history stack for items either!
-
-So are we stuck? Not quite. What we can do is attach a scroll handler which waits until the user stop scrolling and then queries the page current scroll value and then store this in the state using the `replace()` method. Because we use `replace()` rather than `push()` the user is unaware that the url is technically changing everytime they scroll!
-Here is the code for this: 
 ```
     window.addEventListener('scroll', () => {
 
@@ -68,10 +62,10 @@ Here is the code for this:
     });
 
 ```
-On every scroll event, we set schedule a timeout function. Every event cancels the previous timeout. Only when the user stops scrolling will the timeout actually complete and our handler will be called.
-Now when the pop event fires, we have access to the last recorded scroll of the new page within the History item.
+You can see in this code that we debounce the scroll handler as we don't want to run it on every scroll event; only after the user has stopped scrolling, which we define as being half a second without a scroll event happening. After measuring the scroll value, we store it in the history state object. This makes it readily available when we need to use it on a future pop event.
 
-Animating a transition involves having both pages displayed at the same time as one enters and the other leaves. So that one page doesn't push the other one down, you have to absolutely position both of them so they can appear on top of each other along the z axis. This becomes tricky if the pages have been scrolled because in order to avoid a jump, we need to manually scroll the page after it has been absolutely positioned so it appears to be in the same position before and after. Of course we then have to reset this after the transition has taken place. This becomes even more complicated when we realise that for the page that is entering, the content for this can suddenly appear at any time from our network request!
+
+XXXXXXXXXXXXXXXXX
 
 The best way to make sense of this behaviour is to model it as a series of events.
 When a transition takes place we find these events occur for the incoming page:
@@ -91,25 +85,28 @@ If this behaviour suggests Observables to you, then you're thinking along the sa
 Designing Observables can be difficult and it was so here. Marble Diagrams often come in useful here. Here is the one I created for this: 
 
 I started with the two basic Observables. One for animation events (enter, entering, exit, and exiting), and another for the content loaded events. In each navigation there will be only one of those, although in my implementation the Observable lives beyond individual transitions.
+
 ```
    animation events
    -----d----e-------f-------->
  
    content loaded events
    ---3-----------4----------->
+   
  ```
  Since when we handle content loaded events, we need to know about the latest animation event so we combine them using `withLatestForm` operator.
 
- ```
+```
    content loaded events with last animation event
    ----3c-----------4e--------------------->
- ```
- We also do the same for the animation events Observable.
- ```
+```
+We also do the same for the animation events Observable.
+ 
+```
    ----d3-----e3------f4------->
- ```
- Finally we merge these two Observables together
- ```
+```
+Finally we merge these two Observables together
+```
    ----3c-----d3----e3----4e---f4--->
 ```
 This gives us an observable where each event is either an animation or a content loaded event and contains the value of event of the other kind along with it.
@@ -138,6 +135,7 @@ This gives us an observable where each event is either an animation or a content
   ));
 
   const [events$] = useState(merge(enhancedLoadedEvents$, enhancedAnimationEvents$));
+  
 ```
 We subscribe to the resultant Observable and can run some fairly straightforwardd imperative code that does the job of doing the work to make the animations and scroll management work.
 
@@ -149,5 +147,5 @@ This application is purely for demonstration purposes and I haven't implemented 
 
 One thing I didn't take into consideration was the effect of the user resizing the viewport. Probably I would need to implement a handler that runs when the viewport is resized which probably would just reset the scroll to zero.
 
-In general, I am a little bit sceptical about the use of Routing in SPAs. I feel that trying to reimplement what the Browser already does perfectly well seems a bit pointless. Do Web apps really need routing? I'm not so sure. Whilst transitions look nice and are fun, they are far from being a necessity. It would be nice if one day browsers can provide this functionality natively.
+
 
