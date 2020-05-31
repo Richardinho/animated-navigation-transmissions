@@ -30,7 +30,7 @@ The application is set up using create react app which provides a nice foundatio
 ### Routing
 Setting up the routing is the easiest part and so I'm not going to go into it. The React Router has a good tutorial on this subject which describes the process much better than I could.
 
-### Animations
+### Implementation Details
 The CSSTransition component is used for the animation here. What this component does is define a transition as a series of temporal phases through which the component passes. During each phase, class names are applied and removed to the animated element. The programmer is able to hook into these class names to apply CSS properties that carry out the animation effect.
 
 Our animation consists of the old page sliding out to the left and the new page sliding in from the right in the same direction. Normally, a page will just be positioned statically within the browser, but during the animation we need to handle the fact that both pages will be visible at the same time. To achieve this, we hook into phases provided by CSSTransition component. When the ENTER phase begins, we fix the position of both incoming and outgoing pages by setting their css property `position: fixed`. Once we reach the ENTERED phase, we set the position of the incoming pages property to `static` (At this point we don't care anymore about the outgoing page). 
@@ -64,27 +64,33 @@ However, there is a workaround. Instead of measuring the scroll when the user pe
 ```
 You can see in this code that we debounce the scroll handler as we don't want to run it on every scroll event; only after the user has stopped scrolling, which we define as being half a second without a scroll event happening. After measuring the scroll value, we store it in the history state object. This makes it readily available when we need to use it on a future pop event.
 
-
-XXXXXXXXXXXXXXXXX
+We now need to determine the time at which to restore the scroll position of a page.
+Given that we are loading our content asynchronously, we need to wait until this content is present before we set the scroll.
+But we also take into consideration our previously described animation phases because how we reset the scroll will be different according to whether an animation is still taking place or not. For example, if the animation has completed when the content is loaded in, we can simply set the scroll with window.scrollTo as normal, but if the animation is still going on then we need to take account of the fact that the position of the page is currently fixed.
 
 The best way to make sense of this behaviour is to model it as a series of events.
-When a transition takes place we find these events occur for the incoming page:
+
+For the incoming page:
 1. The transition begins. 
 2. The transition ends.
 3. Content is loaded from the network
 
-For the outgoing page we have these events:
-1. The transition beings
+For the outgoing page:
+1. The transition begins
 2. The transition ends
 
 For the incoming page, events 1 and 2 always occur in that order. Event 3, however, can occur at any point, even at the start.
-In response to each event, we need to write code which applies styles, sets the scroll and various other things. What code runs is dependent on the sequence of these events. For example, when the transition begins, we only need to rescroll the page if content has been loaded. Thus we see that we need to persist the state of what events have already taken place.
 
-If this behaviour suggests Observables to you, then you're thinking along the same lines as me. For this project I used RxJS, which is perhaps more commonly associated with Angular but works well with React also, I have found.
+So we have a series of events whose order is unpredictable, on which we need to run some code.
 
-Designing Observables can be difficult and it was so here. Marble Diagrams often come in useful here. Here is the one I created for this: 
+If this suggests Observables to you, then you're thinking along the same lines as me. 
 
-I started with the two basic Observables. One for animation events (enter, entering, exit, and exiting), and another for the content loaded events. In each navigation there will be only one of those, although in my implementation the Observable lives beyond individual transitions.
+Observables are streams of events on which we can register subscribers which will handle each of these events. Libraries such as RxJS, which we use here, allow these streams to be manipulated in many ways: merged with other streams, filtered, mapped to other events etc.
+
+Whilst they are powerful, they can be complex and hard to reason about. Marble diagrams can be helpful to describe these.
+A Marble Diagram is a representation of an observable where the flow of time is shown as an arrow going from left to right, and the events are positioned along this arrow. 
+
+Here is an example which shows our two basic observables.
 
 ```
    animation events
@@ -93,23 +99,30 @@ I started with the two basic Observables. One for animation events (enter, enter
    content loaded events
    ---3-----------4----------->
    
- ```
- Since when we handle content loaded events, we need to know about the latest animation event so we combine them using `withLatestForm` operator.
+```
+In the first one, `d`, `e`, and `f` are animation events that can occur in any order.
+In the second one `3` and `4` are events when content is loaded.
+
+In order to solve the problem where we need to know about the latest animation event when we handle a content loaded event we can create an observable that combines these two observables using the `withLatestForm` operator.
 
 ```
    content loaded events with last animation event
    ----3c-----------4e--------------------->
 ```
-We also do the same for the animation events Observable.
+Also when we handle an animation event, we need to know the latest content loaded event so we create an observable that combines the content loaded observable with the animation observable in the same way.
  
 ```
    ----d3-----e3------f4------->
 ```
-Finally we merge these two Observables together
+Finally we merge these two Observables together because we want one observable.
+
 ```
    ----3c-----d3----e3----4e---f4--->
 ```
-This gives us an observable where each event is either an animation or a content loaded event and contains the value of event of the other kind along with it.
+
+This gives us an observable where each event is either an animation or a content loaded event and contains the latest value of the event of the other kind along with it.
+
+Hopefully, this code makes this a bit more clear:
 
 ```
   const [animationEvents$] = useState(new BehaviorSubject());
@@ -137,7 +150,7 @@ This gives us an observable where each event is either an animation or a content
   const [events$] = useState(merge(enhancedLoadedEvents$, enhancedAnimationEvents$));
   
 ```
-We subscribe to the resultant Observable and can run some fairly straightforwardd imperative code that does the job of doing the work to make the animations and scroll management work.
+We subscribe to the resultant Observable and can run some fairly straightforward imperative code that does the job of doing the work to make the animations and scroll management work.
 
 ## Things that don't work
 Scroll restoration doesn't take place when you refresh the app. When this occurs, the history object is completely reset so you lose all data that was stored there. Implementing this would require storing the data some place else.
