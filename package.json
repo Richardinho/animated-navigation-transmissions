@@ -15,7 +15,10 @@
     "reset-css": "^5.0.1",
     "rxjs": "^6.5.5"
   },
+  "homepage": "https://richardinho.github.io/animated-navigation-transmissions/",
   "scripts": {
+    "predeploy": "npm run build",
+    "deploy": "gh-pages -d build",
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
